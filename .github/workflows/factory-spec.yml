@@ -41,4 +41,4 @@ jobs:
             DO NOT write or modify any code. Post the spec comment and stop.
           claude_args: |
             --model claude-sonnet-4-5-20250929
-            --allowedTools "Read,Glob,Grep,Bash(gh issue view:*),Bash(gh issue comment:*)"
+            --allowedTools "Read,Glob,Grep,Write,Bash"

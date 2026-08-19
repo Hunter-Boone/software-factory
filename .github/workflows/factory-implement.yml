@@ -37,4 +37,4 @@ jobs:
             the body.
           claude_args: |
             --model claude-sonnet-4-5-20250929
-            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(npm test),Bash(npm run:*),Bash(git:*),Bash(gh pr:*),Bash(gh issue view:*)"
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash"

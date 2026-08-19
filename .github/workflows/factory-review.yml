@@ -44,4 +44,4 @@ jobs:
             say so plainly — do not invent problems.
           claude_args: |
             --model claude-opus-4-5-20251101
-            --allowedTools "Read,Glob,Grep,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*)"
+            --allowedTools "Read,Glob,Grep,Write,Bash"
