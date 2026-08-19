@@ -7,7 +7,7 @@ on:
 
 jobs:
   review:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, factory]
     permissions:
       contents: read
       pull-requests: write
