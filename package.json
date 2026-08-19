@@ -1,0 +1,11 @@
+{
+  "name": "widget-api",
+  "version": "1.0.0",
+  "description": "Tiny zero-dependency JSON API used as the demo repo for the mini software factory.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "license": "MIT"
+}
