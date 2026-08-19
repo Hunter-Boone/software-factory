@@ -15,6 +15,16 @@ const metrics = {
   reset() {
     for (const key of Object.keys(counts)) delete counts[key];
   },
+
+  summary() {
+    const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
+    const routes = Object.entries(counts).map(([key, count]) => {
+      const [method, ...pathParts] = key.split(" ");
+      const path = pathParts.join(" ");
+      return { method, path, count };
+    }).sort((a, b) => b.count - a.count);
+    return { total, routes };
+  },
 };
 
 module.exports = { metrics };

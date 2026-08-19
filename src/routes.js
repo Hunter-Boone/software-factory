@@ -13,6 +13,8 @@ const routes = {
   "GET /widgets/count": () => ({ count: widgets.length }),
 
   "GET /metrics": () => metrics.raw(),
+
+  "GET /metrics/summary": () => metrics.summary(),
 };
 
 module.exports = { routes, widgets };

@@ -45,3 +45,25 @@ test("unknown route 404s", async () => {
     assert.equal(res.status, 404);
   });
 });
+
+test("GET /metrics/summary returns sorted route counts with total", async () => {
+  metrics.reset();
+  await withServer(async (base) => {
+    await fetch(`${base}/health`);
+    await fetch(`${base}/health`);
+    await fetch(`${base}/health`);
+    await fetch(`${base}/widgets`);
+    await fetch(`${base}/widgets`);
+    await fetch(`${base}/widgets/count`);
+    const body = await (await fetch(`${base}/metrics/summary`)).json();
+    assert.equal(body.total, 7);
+    assert(Array.isArray(body.routes));
+    assert.equal(body.routes.length, 4);
+    assert.equal(body.routes[0].method, "GET");
+    assert.equal(body.routes[0].path, "/health");
+    assert.equal(body.routes[0].count, 3);
+    assert.equal(body.routes[1].count, 2);
+    assert(body.routes[0].count >= body.routes[1].count);
+    assert(body.routes[1].count >= body.routes[2].count);
+  });
+});

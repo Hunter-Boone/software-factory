@@ -8,7 +8,7 @@ on:
 jobs:
   implement:
     if: github.event.label.name == 'approved'
-    runs-on: [self-hosted, factory]
+    runs-on: ubuntu-latest
     permissions:
       contents: write
       issues: write

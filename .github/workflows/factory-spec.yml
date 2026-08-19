@@ -7,7 +7,7 @@ on:
 
 jobs:
   spec:
-    runs-on: [self-hosted, factory]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       issues: write
