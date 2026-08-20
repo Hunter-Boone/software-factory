@@ -1,0 +1,43 @@
+name: Factory (local) — Implement
+
+# Stage 2 (LOCAL PATH): label 'approved-local' — implemented on my machine via subscription.
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  implement:
+    if: github.event.label.name == 'approved-local'
+    runs-on: [self-hosted, factory]
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Implement the approved spec
+        uses: anthropics/claude-code-action@v1
+        env:
+          ANTHROPIC_BASE_URL: http://127.0.0.1:8317
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic_api_key: ${{ secrets.CPA_PROXY_TOKEN }}
+          track_progress: true
+          prompt: |
+            Implement issue #${{ github.event.issue.number }} in this repository.
+
+            The spec is in the issue comments — read it first and follow it. Then:
+            - Make the code changes.
+            - Add tests for the new behaviour in test/.
+            - Run `npm test` and make sure it passes before you finish.
+
+            Open a pull request that says "Closes #${{ github.event.issue.number }}" in
+            the body.
+          branch_prefix: claude-local/
+          claude_args: |
+            --model claude-sonnet-4-5-20250929
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash"

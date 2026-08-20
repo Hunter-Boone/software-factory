@@ -1,4 +1,4 @@
-name: Factory — Review
+name: Factory (local) — Review
 
 # Stage 3: every PR gets reviewed by a DIFFERENT model than the one that wrote it.
 on:
@@ -7,8 +7,8 @@ on:
 
 jobs:
   review:
-    if: startsWith(github.event.pull_request.head.ref, 'claude/')
-    runs-on: ubuntu-latest
+    if: startsWith(github.event.pull_request.head.ref, 'claude-local/')
+    runs-on: [self-hosted, factory]
     permissions:
       contents: read
       pull-requests: write
@@ -21,9 +21,11 @@ jobs:
 
       - name: Review the pull request
         uses: anthropics/claude-code-action@v1
+        env:
+          ANTHROPIC_BASE_URL: http://127.0.0.1:8317
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          anthropic_api_key: ${{ secrets.CPA_PROXY_TOKEN }}
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}

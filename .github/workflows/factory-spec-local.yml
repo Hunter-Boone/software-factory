@@ -1,15 +1,15 @@
-name: Factory — Spec
+name: Factory (local) — Spec
 
-# Stage 1 (CLOUD PATH): label an issue 'factory' — an agent on GitHub's runners
-# writes the spec, billed to a real ANTHROPIC_API_KEY.
+# Stage 1 (LOCAL PATH): label an issue 'factory-local' — the runner on my own
+# machine does the work through my Claude subscription. No API key, no per-token bill.
 on:
   issues:
     types: [labeled]
 
 jobs:
   spec:
-    if: github.event.label.name == 'factory'
-    runs-on: ubuntu-latest
+    if: github.event.label.name == 'factory-local'
+    runs-on: [self-hosted, factory]
     permissions:
       contents: read
       issues: write
@@ -21,9 +21,11 @@ jobs:
 
       - name: Write implementation spec
         uses: anthropics/claude-code-action@v1
+        env:
+          ANTHROPIC_BASE_URL: http://127.0.0.1:8317
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          anthropic_api_key: ${{ secrets.CPA_PROXY_TOKEN }}
           prompt: |
             REPO: ${{ github.repository }}
             ISSUE NUMBER: ${{ github.event.issue.number }}
