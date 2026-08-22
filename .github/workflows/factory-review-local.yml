@@ -44,7 +44,8 @@ jobs:
 
             Post one review comment with `gh pr comment`. Start it with a verdict line:
             "VERDICT: APPROVE" or "VERDICT: REQUEST CHANGES". If you find nothing wrong,
-            say so plainly — do not invent problems.
+            say so plainly — do not invent problems. If the verdict is APPROVE then merge
+            this pull request
           claude_args: |
             --model claude-opus-4-5-20251101
             --allowedTools "Read,Glob,Grep,Write,Bash"
