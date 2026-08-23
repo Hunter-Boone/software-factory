@@ -1,5 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert");
+const http = require("node:http");
 const { createServer } = require("../src/server");
 const { metrics } = require("../src/metrics");
 
@@ -70,4 +71,80 @@ test("GET /metrics/summary returns sorted route counts with total", async () => 
     assert(body.routes[0].count >= body.routes[1].count);
     assert(body.routes[1].count >= body.routes[2].count);
   });
+});
+
+test("malformed URL returns 400", async () => {
+  const server = createServer();
+  await new Promise((resolve) => server.listen(0, resolve));
+  const port = server.address().port;
+
+  try {
+    const response = await new Promise((resolve) => {
+      const req = http.request({
+        host: "127.0.0.1",
+        port: port,
+        path: "/test",
+        method: "GET",
+        headers: { "host": "[invalid" }
+      }, (res) => {
+        let body = "";
+        res.on("data", (chunk) => body += chunk);
+        res.on("end", () => {
+          resolve({ status: res.statusCode, body: JSON.parse(body) });
+        });
+      });
+      req.end();
+    });
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.error, "malformed URL");
+    assert.equal(response.body.code, "INVALID_URL");
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
+});
+
+test("handler exception returns 500", async () => {
+  const { routes } = require("../src/routes");
+  routes["GET /error-test"] = () => {
+    throw new Error("test error");
+  };
+
+  await withServer(async (base) => {
+    const res = await fetch(`${base}/error-test`);
+    assert.equal(res.status, 500);
+    const body = await res.json();
+    assert.equal(body.error, "internal server error");
+    assert.equal(body.code, "HANDLER_ERROR");
+  });
+
+  delete routes["GET /error-test"];
+});
+
+test("error responses have consistent structure", async () => {
+  await withServer(async (base) => {
+    const res = await fetch(`${base}/nonexistent`);
+    const body = await res.json();
+    assert.ok(body.error);
+    assert.equal(typeof body.error, "string");
+  });
+});
+
+test("server recovers after handler error", async () => {
+  const { routes } = require("../src/routes");
+  routes["GET /throw"] = () => {
+    throw new Error("intentional error");
+  };
+
+  await withServer(async (base) => {
+    const errorRes = await fetch(`${base}/throw`);
+    assert.equal(errorRes.status, 500);
+
+    const healthRes = await fetch(`${base}/health`);
+    assert.equal(healthRes.status, 200);
+    const healthBody = await healthRes.json();
+    assert.equal(healthBody.status, "ok");
+  });
+
+  delete routes["GET /throw"];
 });
