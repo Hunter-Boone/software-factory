@@ -29,6 +29,10 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           anthropic_api_key: ${{ secrets.CPA_PROXY_TOKEN }}
+          # PRs opened by the Implement stage's GITHUB_TOKEN fallback are
+          # authored by github-actions[bot]; the action blocks bot actors
+          # unless allowlisted.
+          allowed_bots: "github-actions"
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
