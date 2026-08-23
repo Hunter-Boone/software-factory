@@ -67,7 +67,14 @@ jobs:
             --jq '[.comments[].body | select(startswith("VERDICT:"))] | last // ""')
           echo "Latest verdict comment starts with: $(printf '%s' "$VERDICT" | head -1)"
           if printf '%s' "$VERDICT" | head -1 | grep -q "VERDICT: APPROVE"; then
+            # Bot-authored PRs don't register "Closes #N" linkage, so close the
+            # issue explicitly after merging.
+            ISSUE=$(gh pr view "$PR_NUMBER" --json body \
+              --jq '.body | capture("[Cc]loses #(?<n>[0-9]+)").n // empty')
             gh pr merge "$PR_NUMBER" --squash --delete-branch
+            if [ -n "$ISSUE" ]; then
+              gh issue close "$ISSUE" --comment "Closed by PR #$PR_NUMBER." || true
+            fi
           else
             echo "No APPROVE verdict — leaving the PR open."
           fi
