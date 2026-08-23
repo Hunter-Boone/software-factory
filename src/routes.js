@@ -20,6 +20,16 @@ const routes = {
   "GET /metrics": () => metrics.raw(),
 
   "GET /metrics/summary": () => metrics.summary(),
+
+  "GET /routes": () => {
+    const endpoints = Object.keys(routes)
+      .map((key) => {
+        const [method, path] = key.split(" ");
+        return { method, path };
+      })
+      .sort((a, b) => a.path.localeCompare(b.path));
+    return { endpoints };
+  },
 };
 
 module.exports = { routes, widgets };

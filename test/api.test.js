@@ -148,3 +148,29 @@ test("server recovers after handler error", async () => {
 
   delete routes["GET /throw"];
 });
+
+test("GET /routes returns all available endpoints", async () => {
+  await withServer(async (base) => {
+    const res = await fetch(`${base}/routes`);
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert(Array.isArray(body.endpoints));
+
+    const paths = body.endpoints.map(e => e.path);
+    assert(paths.includes("/health"));
+    assert(paths.includes("/widgets"));
+    assert(paths.includes("/widgets/count"));
+    assert(paths.includes("/metrics"));
+    assert(paths.includes("/metrics/summary"));
+    assert(paths.includes("/routes"));
+
+    body.endpoints.forEach(endpoint => {
+      assert.equal(typeof endpoint.method, "string");
+      assert.equal(typeof endpoint.path, "string");
+    });
+
+    for (let i = 1; i < body.endpoints.length; i++) {
+      assert(body.endpoints[i - 1].path <= body.endpoints[i].path);
+    }
+  });
+});
