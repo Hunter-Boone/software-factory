@@ -1,6 +1,10 @@
 name: Factory (local) — Implement
 
 # Stage 2 (LOCAL PATH): label 'approved-local' — implemented on my machine via subscription.
+#
+# claude-code-action never opens PRs itself (its harness prompt tells Claude to
+# push a branch and post a compare link instead), so the "Open pull request"
+# step below does it deterministically after Claude finishes.
 on:
   issues:
     types: [labeled]
@@ -20,6 +24,7 @@ jobs:
           fetch-depth: 0
 
       - name: Implement the approved spec
+        id: claude
         uses: anthropics/claude-code-action@v1
         env:
           ANTHROPIC_BASE_URL: http://127.0.0.1:8317
@@ -34,10 +39,37 @@ jobs:
             - Make the code changes.
             - Add tests for the new behaviour in test/.
             - Run `npm test` and make sure it passes before you finish.
+            - Commit and push your changes to the current branch.
 
-            Open a pull request that says "Closes #${{ github.event.issue.number }}" in
-            the body.
+            Do NOT open a pull request and do not post a compare link — the workflow
+            opens the pull request automatically after you finish.
           branch_prefix: claude-local/
           claude_args: |
             --model claude-sonnet-4-5-20250929
             --allowedTools "Read,Write,Edit,Glob,Grep,Bash"
+
+      # GITHUB_TOKEN-created PRs don't trigger the pull_request Review workflow,
+      # so prefer FACTORY_PAT (fine-grained PAT: contents + pull-requests write).
+      # Falls back to GITHUB_TOKEN, which needs "Allow GitHub Actions to create
+      # and approve pull requests" enabled and skips the Review stage.
+      - name: Open pull request
+        if: steps.claude.outputs.branch_name != ''
+        env:
+          GH_TOKEN: ${{ secrets.FACTORY_PAT || github.token }}
+          BRANCH: ${{ steps.claude.outputs.branch_name }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+        run: |
+          if ! git ls-remote --exit-code --heads origin "$BRANCH" > /dev/null; then
+            echo "Branch $BRANCH was never pushed — nothing to open a PR for."
+            exit 0
+          fi
+          if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq length)" != "0" ]; then
+            echo "An open PR for $BRANCH already exists — skipping."
+            exit 0
+          fi
+          gh pr create \
+            --head "$BRANCH" \
+            --base main \
+            --title "$ISSUE_TITLE (#$ISSUE_NUMBER)" \
+            --body "Closes #$ISSUE_NUMBER. Implemented by the factory from the approved spec."

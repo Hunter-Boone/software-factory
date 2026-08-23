@@ -8,7 +8,9 @@ on:
 
 jobs:
   spec:
-    if: github.event.label.name == 'factory'
+    # Skip if the issue is already approved — re-adding labels would otherwise
+    # re-post the spec after implementation has started.
+    if: github.event.label.name == 'factory' && !contains(github.event.issue.labels.*.name, 'approved')
     runs-on: ubuntu-latest
     permissions:
       contents: read
