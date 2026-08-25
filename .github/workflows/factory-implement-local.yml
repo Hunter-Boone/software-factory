@@ -45,7 +45,7 @@ jobs:
             opens the pull request automatically after you finish.
           branch_prefix: claude-local/
           claude_args: |
-            --model claude-sonnet-4-5-20250929
+            --model claude-opus-5
             --allowedTools "Read,Write,Edit,Glob,Grep,Bash"
 
       # GITHUB_TOKEN-created PRs don't trigger the pull_request Review workflow,
