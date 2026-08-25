@@ -44,5 +44,5 @@ jobs:
 
             DO NOT write or modify any code. Post the spec comment and stop.
           claude_args: |
-            --model claude-sonnet-4-5-20250929
+            --model claude-opus-5
             --allowedTools "Read,Glob,Grep,Write,Bash"
