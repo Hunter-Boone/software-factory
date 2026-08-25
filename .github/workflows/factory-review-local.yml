@@ -55,7 +55,7 @@ jobs:
             yourself — the workflow merges it automatically when your verdict is
             APPROVE.
           claude_args: |
-            --model claude-opus-4-5-20251101
+            --model claude-opus-5
             --allowedTools "Read,Glob,Grep,Write,Bash"
 
       - name: Merge on approval
